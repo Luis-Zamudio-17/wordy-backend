@@ -5,10 +5,6 @@ on:
     branches:
       - main
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -43,14 +39,6 @@ jobs:
         with:
           name: java-app
 
-      # Login a Azure usando los secretos OIDC
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_A6308E187AF34053AF5A09CC0DE76823 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3ED6012E95A8473A8924F896F2DBF5FC }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6C1E072B72534A22989E794D11807D44 }}
-
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -58,3 +46,4 @@ jobs:
           app-name: 'wordy-api-marvin'
           slot-name: 'Production'
           package: '*.jar'
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
