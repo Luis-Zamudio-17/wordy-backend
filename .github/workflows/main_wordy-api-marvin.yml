@@ -31,14 +31,16 @@ jobs:
           ls -lh target/app.jar
 
       
+      
       - name: Inspect executable JAR
         run: |
-          echo "=== Manifest ==="
-          unzip -p target/app.jar META-INF/MANIFEST.MF
-          echo "=== Main class ==="
+          echo "=== Archivos que contienen WordyBackendApplication ==="
           jar tf target/app.jar | grep -i 'WordyBackendApplication' || true
-          echo "=== Spring Boot classes ==="
-          jar tf target/app.jar | grep 'BOOT-INF/classes/com/wordy/wordy_backend/' | head -30
+          echo "=== Primeras clases empaquetadas ==="
+          jar tf target/app.jar | grep '\.class$' | head -40
+          echo "=== Contenido de BOOT-INF/classes ==="
+          jar tf target/app.jar | grep '^BOOT-INF/classes/' | head -60
+
 
 
       - name: Upload artifact for deployment job
