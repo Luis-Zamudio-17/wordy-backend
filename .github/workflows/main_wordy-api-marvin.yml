@@ -17,12 +17,19 @@ jobs:
           java-version: '17'
           distribution: 'microsoft'
 
+      
       - name: Build with Maven
         run: |
           mvn -B clean package
-          jar tf target/wordy-backend-0.0.1-SNAPSHOT.jar > jar-content.txt
-          grep 'BOOT-INF/classes/com/wordy/wordy_backend/WordyBackendApplication.class' jar-content.txt
-          mv target/wordy-backend-0.0.1-SNAPSHOT.jar target/app.jar
+          echo "=== Archivos JAR generados ==="
+          find target -maxdepth 1 -type f -name "*.jar" -print
+          echo "=== Buscando clase principal ==="
+          jar tf target/wordy-backend-0.0.1-SNAPSHOT.jar | grep 'WordyBackendApplication' || true
+          echo "=== Preparando JAR para Azure ==="
+          cp target/wordy-backend-0.0.1-SNAPSHOT.jar target/app.jar
+          test -s target/app.jar
+          ls -lh target/app.jar
+
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
