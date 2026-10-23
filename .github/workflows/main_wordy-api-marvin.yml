@@ -1,0 +1,83 @@
+name: Build and deploy JAR app to Azure Web App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java version
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'microsoft'
+
+      
+      
+      - name: Inspect repository structure
+        run: |
+          echo "=== Directorio actual ==="
+          pwd
+          echo "=== Archivos y carpetas del repositorio ==="
+          ls -la
+          echo "=== Buscando pom.xml y archivos Java ==="
+          find . -type f \( -name "pom.xml" -o -name "*.java" \) | head -100
+
+
+      - name: Build with Maven
+        run: |
+          mvn -B clean package
+          echo "=== Archivos JAR generados ==="
+          find target -maxdepth 1 -type f -name "*.jar" -print
+          echo "=== Buscando clase principal ==="
+          jar tf target/wordy-backend-0.0.1-SNAPSHOT.jar | grep 'WordyBackendApplication' || true
+          echo "=== Preparando JAR para Azure ==="
+          cp target/wordy-backend-0.0.1-SNAPSHOT.jar target/app.jar
+          test -s target/app.jar
+          ls -lh target/app.jar
+
+      
+      
+      - name: Inspect executable JAR
+        run: |
+          echo "=== Archivos que contienen WordyBackendApplication ==="
+          jar tf target/app.jar | grep -i 'WordyBackendApplication' || true
+          echo "=== Primeras clases empaquetadas ==="
+          jar tf target/app.jar | grep '\.class$' | head -40
+          echo "=== Contenido de BOOT-INF/classes ==="
+          jar tf target/app.jar | grep '^BOOT-INF/classes/' | head -60
+
+
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-app
+          path: target/app.jar
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: java-app
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'wordy-api-marvin'
+          slot-name: 'Production'
+          package: 'app.jar'
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
