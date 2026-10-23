@@ -53,7 +53,9 @@
 		</dependency>
 	</dependencies>
 
-		<build>
+			<packaging>jar</packaging>
+
+	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -63,6 +65,7 @@
 				</configuration>
 				<executions>
 					<execution>
+						<id>repackage</id>
 						<goals>
 							<goal>repackage</goal>
 						</goals>
