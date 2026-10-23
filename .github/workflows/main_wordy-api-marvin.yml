@@ -18,13 +18,16 @@ jobs:
           distribution: 'microsoft'
 
       
-      - name: Inspect source files
+      
+      - name: Inspect repository structure
         run: |
-          echo "=== Archivos Java del proyecto ==="
-          find src/main/java -type f -name "*.java"
-          echo "=== Clases compiladas por Maven ==="
-          mvn -B clean compile
-          find target/classes -type f -name "*.class"
+          echo "=== Directorio actual ==="
+          pwd
+          echo "=== Archivos y carpetas del repositorio ==="
+          ls -la
+          echo "=== Buscando pom.xml y archivos Java ==="
+          find . -type f \( -name "pom.xml" -o -name "*.java" \) | head -100
+
 
       - name: Build with Maven
         run: |
