@@ -30,6 +30,16 @@ jobs:
           test -s target/app.jar
           ls -lh target/app.jar
 
+      
+      - name: Inspect executable JAR
+        run: |
+          echo "=== Manifest ==="
+          unzip -p target/app.jar META-INF/MANIFEST.MF
+          echo "=== Main class ==="
+          jar tf target/app.jar | grep -i 'WordyBackendApplication' || true
+          echo "=== Spring Boot classes ==="
+          jar tf target/app.jar | grep 'BOOT-INF/classes/com/wordy/wordy_backend/' | head -30
+
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
