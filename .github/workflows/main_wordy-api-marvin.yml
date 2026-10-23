@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,13 +22,15 @@ jobs:
           distribution: 'microsoft'
 
       - name: Build with Maven
-        run: mvn clean package spring-boot:repackage
+        run: |
+          mvn clean package
+          cp target/wordy-backend-0.0.1-SNAPSHOT.jar target/app.jar
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: target/*.jar
+          path: target/app.jar
 
   deploy:
     runs-on: ubuntu-latest
@@ -39,11 +45,17 @@ jobs:
         with:
           name: java-app
 
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_A6308E187AF34053AF5A09CC0DE76823 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3ED6012E95A8473A8924F896F2DBF5FC }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6C1E072B72534A229B9E794D11807D44 }}
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'wordy-api-marvin'
           slot-name: 'Production'
-          package: '*.jar'
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: 'app.jar'
