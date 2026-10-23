@@ -18,6 +18,14 @@ jobs:
           distribution: 'microsoft'
 
       
+      - name: Inspect source files
+        run: |
+          echo "=== Archivos Java del proyecto ==="
+          find src/main/java -type f -name "*.java"
+          echo "=== Clases compiladas por Maven ==="
+          mvn -B clean compile
+          find target/classes -type f -name "*.class"
+
       - name: Build with Maven
         run: |
           mvn -B clean package
